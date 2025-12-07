@@ -10,7 +10,10 @@
 </head>
 <body>
     <header>
-        Общая шапка для сайта
+        <nav>
+            <a href=" {% url "post_list" %}">Все посты</a>
+            <a href=" {% url "new_post" %}">Создать пост</a>
+</nav>
     </header>
     
     <main>
@@ -22,5 +25,9 @@
     </footer>
 </body>
 </html>
+
+
+
+
 
 
