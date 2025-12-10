@@ -1,42 +1,39 @@
+
 from django.shortcuts import render, get_object_or_404, redirect
 
 from blog.models import Post
+from blog.forms import PostForm
+
 
 def get_post_list(request):
     posts = Post.objects.all()
 
     return render(request, template_name='blog/post_list.html', context={'posts': posts})
 
+
 def get_post_detail(request, post_id):
-    # return render(request, 'blog/post_detail.html', {'post': Post.objects.get(id=post_id)})
-    return render(request, 'blog/post_detail.html', {'post': get_object_or_404(Post, id=post_id)})
+    return render(request, 'blog/post_detail.html', {"post": get_object_or_404(Post, id=post_id)})
+
 
 def create_post(request):
     if request.method == "POST":
-        title = request.POST.get('title').strip()
-        text = request.POST.get('text').strip()
+        form = PostForm(request.POST)
 
-        errors = {}
+        if form.is_valid():
+            post = Post.objects.create(
+                title=form.cleaned_data['title'],
+                text=form.cleaned_data['text']
+            )
 
-        if not title:
-            errors['title'] = 'Заголовок обязателен.'
-
-        if not text:
-            errors['text'] = 'Текст поста обязательно нужно указать.'
-
-        if not errors:
-            post = Post.objects.create(title=title, text=text)
             return redirect('post_detail', post_id=post.id)
         else:
-            context = {
-                'errors': errors,
-                'title': title,
-                'text': text
-            }
-            return render(request, 'blog/post_add.html', context)
+            return render(request, 'blog/post_add.html', {"form": form})
 
-    return render(request, 'blog/post_add.html')
+    # GET
+    form = PostForm()
 
-    
+    return render(request, 'blog/post_add.html', {"form": form})
+
+
 
 
