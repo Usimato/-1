@@ -8,16 +8,22 @@
     <form method="POST">
         {% csrf_token %}
 
-        {% for field in form %}
-            <div>
-                {{ field.label_tag }} 
-                {{field }}
-                {{ field.errors}}
-            </div>
-        {% endfor %}
+        <div>
+            {{ form.title.label_tag }}
+            {{ form.title }}
+            {{ form.title.errors }}
+        </div>
+
+        <div>
+            {{ form.text.label_tag }}
+            {{ form.text }}
+            {{ form.text.errors }}
+        </div>
 
         <button type="submit">Создать</button>
     </form>
 {% endblock page_content %}
+
+
 
 
