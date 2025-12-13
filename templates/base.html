@@ -1,4 +1,5 @@
 {% load static %}
+{% load django_bootstrap5 %}
 
 <!DOCTYPE html>
 <html lang="ru">
@@ -7,20 +8,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block page_title %}{% endblock page_title %}</title>
 
-    <link rel="stylesheet" href="{% static 'css/bs/bootstrap.min.css' %}">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
 
-<link rel="stylesheet" href="{% static 'css/core.css' %}"> 
+    <link rel="stylesheet" href="{% static 'css/core.css' %}"> 
 
 </head>
 <body>
-
-</div>
     <header>
         <nav>
             <a href=" {% url "post_list" %}">Все посты</a>
             <a href=" {% url "new_post" %}">Создать пост</a>
-</nav>
+        </nav>
     </header>
     
     <main>
