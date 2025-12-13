@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, get_object_or_404, redirect
 
 from blog.models import Post
@@ -53,9 +54,15 @@ def update_post(request, post_id):
 
 
 def delete_post(request, post_id):
-    get_object_or_404(Post, id=post_id).delete()
-    
-    return redirect("post_list")
+    post = get_object_or_404(Post, id=post_id)
+
+    if request.method == "POST":
+        post.delete()
+        return redirect("post_list")
+
+    return render(request, 'blog/confirm_post_delete.html', {'post': post})
+
+
 
 
 

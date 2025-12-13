@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block page_title %}{{ post.title }}{% endblock page_title %}
@@ -12,12 +13,9 @@
     <p>{{ post.created_at|date:"d.m.Y H:i" }}</p>
 
     <a href="{% url 'edit_post' post.id %}">Редактировать пост</a>
-    <form method="POST" action="{% url 'remove_post' post.id %}">
-        {% csrf_token %}
-
-        <button type="submit">Удалить пост</button>
-    </form>
+    <a href="{% url 'remove_post' post.id %}">Удалить пост</a>
 {% endblock page_content %}
+
 
 
 
