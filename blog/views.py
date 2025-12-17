@@ -1,5 +1,7 @@
 
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+
 
 from blog.models import Post
 from blog.forms import PostForm
@@ -15,7 +17,7 @@ def get_post_detail(request, post_id):
     # return render(request, 'blog/post_detail.html', {"post": Post.objects.get(id=post_id)})
     return render(request, 'blog/post_detail.html', {"post": get_object_or_404(Post, id=post_id)})
 
-
+@login_required
 def create_post(request):
     title = "Создать пост"
     submit_button_text = 'Создать'
