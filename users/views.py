@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
 
-from config.settings import DEFAULT_LOGIN_REDIRECT_URL
+from django.conf import settings
 
 
 def register_view(request):
@@ -16,6 +16,7 @@ def register_view(request):
             return render(request, 'users/register.html', {'form': form})
 
     form = UserCreationForm()
+
     return render(request, 'users/register.html', {'form': form})
 
 
@@ -25,12 +26,13 @@ def login_view(request):
         if form.is_valid():
             login(request, form.get_user())
 
-            next_url = request.GET.get('next', DEFAULT_LOGIN_REDIRECT_URL)
+            next_url = request.GET.get('next', settings.DEFAULT_LOGIN_REDIRECT_URL) # next будет '/posts/add/', например
             return redirect(next_url)
         else:
             return render(request, 'users/login.html', {'form': form})
 
     form = AuthenticationForm()
+
     return render(request, 'users/login.html', {'form': form})
 
 
