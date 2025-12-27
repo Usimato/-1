@@ -5,21 +5,27 @@
 {% block page_content %}
     <h1>{{ title }}</h1>
 
-    <form method="POST">
-    {% csrf_token %}
-    
-    <div>
-        {{ form.title.label_tag }}
-        {{ form.title }}
-        {{ form.title.errors }}
-    </div>
+    <form method="POST" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        
+        <div>
+            {{ form.title.label_tag }}
+            {{ form.title }}
+            {{ form.title.errors }}
+        </div>
 
-    <div>
-        {{ form.text.label_tag }}
-        {{ form.text }}
-        {{ form.text.errors }}
-    </div>
+        <div>
+            {{ form.text.label_tag }}
+            {{ form.text }}
+            {{ form.text.errors }}
+        </div>
 
-    <button type="submit">{{ submit_button_text }}</button>
+        <div>
+            {{ form.image.label_tag }}
+            {{ form.image }}
+            {{ form.image.errors }}
+        </div>
+
+        <button type="submit">{{ submit_button_text }}</button>
     </form>
 {% endblock page_content %}
