@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_bootstrap5',
+    'django_bootstrap_icons',
     'django_extensions',
     'blog',
     'users'
@@ -120,6 +121,13 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static/']
+
+
+# Media Files (User files)
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
