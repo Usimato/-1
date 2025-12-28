@@ -1,5 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.utils.text import slugify
+from unidecode import unidecode
 
 from blog.models import Post
 from blog.forms import PostForm
@@ -10,8 +12,8 @@ def get_post_list(request):
     return render(request, template_name='blog/post_list.html', context={'posts': posts})
 
 
-def get_post_detail(request, post_id):
-    return render(request, 'blog/post_detail.html', {"post": get_object_or_404(Post, id=post_id)})
+def get_post_detail(request, post_slug):
+    return render(request, 'blog/post_detail.html', {"post": get_object_or_404(Post, slug=post_slug)})
 
 
 @login_required
@@ -24,8 +26,9 @@ def create_post(request):
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
+            post.slug = slugify(unidecode(post.title))
             post.save()
-            return redirect('blog:post_detail', post_id=post.id)
+            return redirect('blog:post_detail', post_slug=post.slug)
     
     return render(request, 'blog/post_form.html', {
         "form": form, 
@@ -46,7 +49,7 @@ def update_post(request, post_id):
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
             form.save()
-            return redirect("blog:post_detail", post_id=post.id)
+            return redirect("blog:post_detail", post_slug=post.slug)
     else:
         form = PostForm(instance=post)
     

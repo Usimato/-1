@@ -3,9 +3,9 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-
 class Post(models.Model):
     title = models.CharField(max_length=200, verbose_name="Заголовок")
+    slug = models.SlugField(max_length=200, unique=True, editable=False, verbose_name="Слаг")  
     text = models.TextField(verbose_name="Текст")
     image = models.ImageField(upload_to="post_images/", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -17,6 +17,6 @@ class Post(models.Model):
         db_table = 'blog_posts'
 
     def __str__(self):
-        return self.title
-    
-    
+        return self.title  
+
+
