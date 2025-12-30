@@ -8,11 +8,13 @@ from blog.forms import PostForm
 
 
 def get_post_list(request):
-    posts = Post.objects.all()
+    posts = Post.objects.filter(status="published")
+
     return render(request, template_name='blog/post_list.html', context={'posts': posts})
 
 
 def get_post_detail(request, post_slug):
+    # return render(request, 'blog/post_detail.html', {"post": Post.objects.get(slug=post_slug)})
     return render(request, 'blog/post_detail.html', {"post": get_object_or_404(Post, slug=post_slug)})
 
 
@@ -20,6 +22,7 @@ def get_post_detail(request, post_slug):
 def create_post(request):
     title = "Создать пост"
     submit_button_text = 'Создать'
+
     form = PostForm(request.POST or None, request.FILES or None)
 
     if request.method == "POST":
@@ -28,18 +31,18 @@ def create_post(request):
             post.author = request.user
             post.slug = slugify(unidecode(post.title))
             post.save()
+
             return redirect('blog:post_detail', post_slug=post.slug)
-    
-    return render(request, 'blog/post_form.html', {
-        "form": form, 
-        'title': title, 
-        'submit_button_text': submit_button_text
-    })
+        # Если форма невалидна, продолжим к render ниже
+
+    return render(request, 'blog/post_form.html', {"form": form, 'title': title, 'submit_button_text': submit_button_text})
 
 
+@login_required
 def update_post(request, post_id):
     title = "Редактировать пост"
     submit_button_text = 'Обновить'
+
     post = get_object_or_404(Post, id=post_id)
 
     if request.user != post.author:
@@ -47,19 +50,17 @@ def update_post(request, post_id):
 
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES, instance=post)
+        
         if form.is_valid():
             form.save()
             return redirect("blog:post_detail", post_slug=post.slug)
     else:
         form = PostForm(instance=post)
-    
-    return render(request, 'blog/post_form.html', {
-        "form": form, 
-        'title': title, 
-        'submit_button_text': submit_button_text
-    })
+
+    return render(request, 'blog/post_form.html', context={"form": form, 'title': title, 'submit_button_text': submit_button_text})
 
 
+@login_required
 def delete_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
