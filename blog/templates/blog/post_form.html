@@ -1,5 +1,3 @@
-{% extends "base.html" %}
-
 {% block page_title %}{{ title }}{% endblock page_title %}
 
 {% block page_content %}
@@ -12,6 +10,13 @@
             {{ form.title.label_tag }}
             {{ form.title }}
             {{ form.title.errors }}
+        </div>
+
+        <div>
+            {{ form.category.label_tag }}
+            {{ form.category }}
+            {{ form.category.errors }}
+            {{ form.category.help_text }}
         </div>
 
         <div>
