@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ post.title }}{% endblock page_title %}
+
+{% block page_content %}
+    <a href="{% url 'blog:post_list' %}">&larr; Назад</a>
+
+    <h1>Детали поста:</h1>
+    <h2>ID поста: {{ post.id }}</h2>
+    <h3>{{ post.title }}</h3>
+
+    {% if request.user == post.author %}
+        <p>Статус: {{ post.get_status_display }}</p>
+    {% endif %}
+
+    <p>Категория: <a href="{{ post.category.get_absolute_url }}">{{ post.category.name }}</a></p>
+    {% comment %} <p>Категория: <a href="{% url 'blog:category_posts' post.category.slug %}">{{ post.category.name }}</a></p> {% endcomment %}
+
+    {% if post.image %}
+        <img src="{{ post.image.url }}" alt="Картинка поста">
+    {% endif %}
+
+    <p>{{ post.text }}</p>
+    <p>{{ post.created_at|date:"d.m.Y H:i" }}</p>
+
+    <p>Автор поста: <a href="{% url "users:profile" username=post.author.username %}">{{ post.author }}</a></p>
+
+    {% if request.user == post.author %}
+        <a href="{% url 'blog:edit_post' post.id %}">Редактировать пост</a>
+        <a href="{% url 'blog:remove_post' post.id %}">Удалить пост</a>
+    {% endif %}
+{% endblock page_content %}
