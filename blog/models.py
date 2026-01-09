@@ -21,10 +21,11 @@ class Post(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Категория"
     )
+    tags = models.ManyToManyField("Tag", related_name='posts', blank=True, verbose_name='Теги')
     text = models.TextField(verbose_name="Текст")
     image = models.ImageField(upload_to="post_images/", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')  # можно указать SET_NULL
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts') # можно указать SET_NULL
     status = models.CharField(choices=STATUS_CHOICES, default='draft', verbose_name="Статус")
 
     class Meta:
@@ -40,13 +41,9 @@ class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название')
     slug = models.SlugField(unique=True, editable=False, verbose_name="Слаг")
 
-    class Meta:
-        verbose_name = 'Категория'
-        verbose_name_plural = "Категории"
-        db_table = "blog_categories"
-
     def save(self, *args, **kwargs):
         self.slug = slugify(unidecode(self.name))
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -54,3 +51,29 @@ class Category(models.Model):
 
     def get_absolute_url(self):
         return reverse('blog:category_posts', kwargs={'category_slug': self.slug})
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = "Категории"
+        db_table = "blog_categories"
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=100, verbose_name='Название')
+    slug = models.SlugField(unique=True, editable=False, verbose_name='Слаг')
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(unidecode(self.name))
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'#{self.name}'
+
+    def get_absolute_url(self):
+        return reverse('blog:tag_posts', args=[self.slug])
+
+    class Meta:
+        verbose_name = 'Тег'
+        verbose_name_plural = "Теги"
+        db_table = "blog_tags"

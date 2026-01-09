@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.text import slugify
 from unidecode import unidecode
 
-from blog.models import Post, Category
+from blog.models import Post, Category, Tag
 from blog.forms import PostForm
 
 
@@ -24,8 +24,18 @@ def get_category_posts(request, category_slug):
     return render(request, 'blog/pages/category_posts.html', context)
 
 
+def get_tag_posts(request, tag_slug):
+    tag = get_object_or_404(Tag, slug=tag_slug)
+    posts = Post.objects.filter(tags=tag, status='published')
+
+    return render(request, 'blog/pages/tag_posts.html', {
+        'tag': tag,
+        'posts': posts
+    })
+
+
 def get_post_detail(request, post_slug):
-    # return render(request, 'blog/post_detail.html', {"post": Post.objects.get(slug=post_slug)})
+    # return render(request, 'blog/pages/post_detail.html', {"post": Post.objects.get(slug=post_slug)})
     return render(request, 'blog/pages/post_detail.html', {"post": get_object_or_404(Post, slug=post_slug)})
 
 
@@ -44,7 +54,7 @@ def create_post(request):
             post.save()
 
             return redirect('blog:post_detail', post_slug=post.slug)
-    # Если форма невалидна, продолжим к render ниже
+        # Если форма невалидна, продолжим к render ниже
 
     return render(request, 'blog/pages/post_form.html', {"form": form, 'title': title, 'submit_button_text': submit_button_text})
 
@@ -87,4 +97,4 @@ def delete_post(request, post_id):
 
 
 def main_page_view(request):
-    return render(request, template_name='blog/main_page.html')
+    return render(request, template_name='blog/pages/main_page.html')
