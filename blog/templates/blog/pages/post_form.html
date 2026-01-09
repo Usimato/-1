@@ -1,3 +1,5 @@
+{% extends "base.html" %}
+
 {% block page_title %}{{ title }}{% endblock page_title %}
 
 {% block page_content %}
@@ -5,7 +7,7 @@
 
     <form method="POST" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
-        
+    
         <div>
             {{ form.title.label_tag }}
             {{ form.title }}
@@ -17,6 +19,12 @@
             {{ form.category }}
             {{ form.category.errors }}
             {{ form.category.help_text }}
+        </div>
+
+        <div>
+            {{ form.tags.label_tag }}
+            {{ form.tags }}
+            {{ form.tags.errors }}
         </div>
 
         <div>
