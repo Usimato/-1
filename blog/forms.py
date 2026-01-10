@@ -4,27 +4,34 @@ from blog.models import Post
 
 
 class PostForm(forms.ModelForm):
+    tags_input = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите теги через запятую'
+        }),
+        label="Теги"
+    )
+
     class Meta:
         model = Post
-        fields = ['title', 'category', 'tags', 'text', 'image']
+        fields = ['title', 'category', 'text', 'image']
         widgets = {
-        'title': forms.TextInput(attrs={
-            'placeholder': "заголовок (максимальная длина 200 символов)"
-        }),
-        'category': forms.Select(attrs={'class': 'form-control'}),
-        'tags': forms.SelectMultiple(attrs={'class': 'form-control'}),
-        'image': forms.FileInput(attrs={'class': 'form-control'})
+            'title': forms.TextInput(attrs={
+                'placeholder': "заголовок (максимальная длина 200 символов)"
+            }),
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'image': forms.FileInput(attrs={'class': 'form-control'})
         }
-    labels = {
-        'title': 'Заголовок поста:',
-        'category': 'Категория:',
-        'tags': 'Теги:',
-        'text': 'Текст поста:',
-        'image': 'Картинка поста'
+        labels = {
+            'title': 'Заголовок поста:',
+            'category': 'Категория:',
+            'text': 'Текст поста:',
+            'image': 'Картинка поста'
         }
-    help_texts = {
-        'category': "- можно выбрать только одну категорию"
-    }
+        help_texts = {
+            'category': "- можно выбрать только одну категорию"
+        }
 
     def clean_title(self):
         title = self.cleaned_data['title'].strip()
@@ -37,8 +44,15 @@ class PostForm(forms.ModelForm):
         
         return title
 
-
-
+    def clean_tags_input(self):
+        """
+        Разбивает строку на список тегов:
+        - удаляет лишние пробелы вокруг
+        - приводит к нижнему регистру
+        """
+        tags_str = self.cleaned_data.get('tags_input', '')  # ← если None, будет пустая строка
+        tags = [tag.strip().lower() for tag in tags_str.split(',') if tag.strip()]
+        return tags
 
 
 
