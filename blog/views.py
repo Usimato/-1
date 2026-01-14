@@ -24,7 +24,9 @@ class CategoryPostsView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         context['category'] = self.category
+    
         return context
 
 
@@ -38,7 +40,9 @@ class TagPostsView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         context['tag'] = self.tag
+
         return context
 
 
@@ -61,7 +65,6 @@ class CreatePostView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         post = form.save(commit=False)
         post.author = self.request.user
-        post.slug = slugify(unidecode(post.title))
         post.save()
 
         tags = form.cleaned_data.get('tags_input')
@@ -80,13 +83,15 @@ class PostUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         context['title'] = "Редактировать пост"
         context['submit_button_text'] = "Обновить"
         context['form'].fields['tags_input'].initial = ", ".join(tag.name for tag in self.object.tags.all())
+    
         return context
 
     def form_valid(self, form):
-        if self.request.user != self.object.author:
+        if (self.request.user != self.object.author):
             return render(self.request, 'blog/pages/not_allowed.html')
 
         form.save()
@@ -103,7 +108,7 @@ class PostUpdateView(UpdateView):
 def delete_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
-    if request.user != post.author:
+    if (request.user != post.author):
         return render(request, 'blog/pages/not_allowed.html')
 
     if request.method == "POST":

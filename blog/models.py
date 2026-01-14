@@ -26,8 +26,13 @@ class Post(models.Model):
     image = models.ImageField(upload_to="post_images/", null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата последнего изменения")
     created_at = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')  # можно указать SET_NULL
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts') # можно указать SET_NULL
     status = models.CharField(choices=STATUS_CHOICES, default='draft', verbose_name="Статус")
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(unidecode(self.title))
+
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'пост'
