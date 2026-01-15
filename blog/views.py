@@ -1,7 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.utils.text import slugify
-from unidecode import unidecode
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from blog.models import Post, Category, Tag
@@ -24,9 +23,7 @@ class CategoryPostsView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         context['category'] = self.category
-    
         return context
 
 
@@ -40,9 +37,7 @@ class TagPostsView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         context['tag'] = self.tag
-
         return context
 
 
@@ -83,15 +78,13 @@ class PostUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         context['title'] = "Редактировать пост"
         context['submit_button_text'] = "Обновить"
         context['form'].fields['tags_input'].initial = ", ".join(tag.name for tag in self.object.tags.all())
-    
         return context
 
     def form_valid(self, form):
-        if (self.request.user != self.object.author):
+        if self.request.user != self.object.author:
             return render(self.request, 'blog/pages/not_allowed.html')
 
         form.save()
@@ -105,17 +98,22 @@ class PostUpdateView(UpdateView):
         return redirect('blog:post_detail', post_slug=self.object.slug)
 
 
-def delete_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+class PostDeleteView(LoginRequiredMixin, DeleteView):
+    model = Post
+    pk_url_kwarg = 'post_id'
+    template_name = 'blog/pages/confirm_post_delete.html'
+    # context_object_name = 'post' Необязательно
+    success_url = reverse_lazy('blog:post_list')
 
-    if (request.user != post.author):
-        return render(request, 'blog/pages/not_allowed.html')
-
-    if request.method == "POST":
-        post.delete()
-        return redirect("blog:post_list")
-
-    return render(request, 'blog/pages/confirm_post_delete.html', {'post': post})
+    def dispatch(self, request, *args, **kwargs):
+        # Получаем объект до любых действий
+        self.object = self.get_object()
+    
+        # Проверяем права доступа
+        if request.user != self.object.author:
+            return render(request, 'blog/pages/not_allowed.html')
+    
+        return super().dispatch(request, *args, **kwargs)
 
 
 def main_page_view(request):
