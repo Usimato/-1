@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import F
 
 from blog.models import Post, Category, Tag
 from blog.forms import PostForm
@@ -24,7 +25,9 @@ class CategoryPostsView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         context['category'] = self.category
+    
         return context
 
 
@@ -38,7 +41,9 @@ class TagPostsView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         context['tag'] = self.tag
+
         return context
 
 
@@ -48,6 +53,17 @@ class PostDetailView(DetailView):
     template_name = 'blog/pages/post_detail.html'
     # context_object_name = 'post' Необязательно
     # slug_field = 'slug' Необязательно
+
+    def get_object(self, queryset=None):
+        post = super().get_object(queryset)
+
+        session_key = f'post_{post.id}_viewed'  # "post_32_viewed"
+        if not self.request.session.get(session_key, False) and post.author != self.request.user:
+            Post.objects.filter(id=post.id).update(views=F("views") + 1)
+            post.views = post.views + 1
+            self.request.session[session_key] = True
+
+        return post
 
 
 class CreatePostView(LoginRequiredMixin, CreateView):
@@ -79,9 +95,11 @@ class PostUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         context['title'] = "Редактировать пост"
         context['submit_button_text'] = "Обновить"
         context['form'].fields['tags_input'].initial = ", ".join(tag.name for tag in self.object.tags.all())
+    
         return context
 
     def form_valid(self, form):
