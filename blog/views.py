@@ -3,6 +3,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F, Q
+from django.http import JsonResponse
 
 from blog.models import Post, Category, Tag
 from blog.forms import PostForm
@@ -24,7 +25,7 @@ class PostSearchView(ListView):
         context = super().get_context_data(**kwargs)
         context['search_performed'] = any(self.request.GET.keys())
         return context
-
+    
     def get_queryset(self):
         search_query = self.request.GET.get("search")
 
@@ -40,7 +41,7 @@ class PostSearchView(ListView):
                 query |= Q(tags__name__icontains=search_query)
 
             return queryset.filter(query)
-    
+        
         return Post.objects.none()
 
 
@@ -87,7 +88,7 @@ class PostDetailView(DetailView):
         post = super().get_object(queryset)
 
         user = self.request.user
-        session_key = f'post_{post.id}_viewed'  # "post_32_viewed"
+        session_key = f'post_{post.id}_viewed' # "post_32_viewed"
         if not self.request.session.get(session_key, False) and post.author != user:
             Post.objects.filter(id=post.id).update(views=F("views") + 1)
             post.views = post.views + 1
@@ -97,6 +98,24 @@ class PostDetailView(DetailView):
             post.viewed_users.add(user)
 
         return post
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        user = self.request.user
+        post = self.object
+
+        context['is_liked'] = False
+        context['is_disliked'] = False
+        
+        if user.is_authenticated:
+            context['is_liked'] = post.liked_users.filter(id=user.id).exists()
+            context['is_disliked'] = post.disliked_users.filter(id=user.id).exists()
+
+        context['likes_count'] = post.liked_users.count()
+        context['dislikes_count'] = post.disliked_users.count()
+
+        return context
 
 
 class CreatePostView(LoginRequiredMixin, CreateView):
@@ -164,9 +183,67 @@ class PostDeleteView(LoginRequiredMixin, DeleteView):
         # Проверяем права доступа
         if request.user != self.object.author:
             return render(request, 'blog/pages/not_allowed.html')
-    
+        
         return super().dispatch(request, *args, **kwargs)
 
 
 class MainPageView(TemplateView):
     template_name = 'blog/pages/main_page.html'
+
+
+def post_like_toggle_view(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+
+    has_liked = post.liked_users.filter(id=user.id).exists()
+    has_disliked = post.disliked_users.filter(id=user.id).exists()
+
+    if has_liked:
+        post.liked_users.remove(user)
+        has_liked = False
+    else:
+        post.liked_users.add(user)
+        has_liked = True
+
+        if has_disliked:
+            post.disliked_users.remove(user)
+            has_disliked = False
+
+    likes_count = post.liked_users.count()
+    dislikes_count = post.disliked_users.count()
+
+    return JsonResponse({
+        'likes_count': likes_count,
+        'dislikes_count': dislikes_count,
+        'has_liked': has_liked,
+        'has_disliked': has_disliked
+    })
+
+
+def post_dislike_toggle_view(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+
+    has_disliked = post.disliked_users.filter(id=user.id).exists()
+    has_liked = post.liked_users.filter(id=user.id).exists()
+
+    if has_disliked:
+        post.disliked_users.remove(user)
+        has_disliked = False
+    else:
+        post.disliked_users.add(user)
+        has_disliked = True
+
+        if has_liked:
+            post.liked_users.remove(user)
+            has_liked = False
+
+    dislikes_count = post.disliked_users.count()
+    likes_count = post.liked_users.count()
+
+    return JsonResponse({
+        'dislikes_count': dislikes_count,
+        'likes_count': likes_count,
+        'has_disliked': has_disliked,
+        'has_liked': has_liked
+    })

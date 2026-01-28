@@ -26,10 +26,22 @@ class Post(models.Model):
     image = models.ImageField(upload_to="post_images/", null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата последнего изменения")
     created_at = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')  # можно указать SET_NULL
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts') # можно указать SET_NULL
     status = models.CharField(choices=STATUS_CHOICES, default='draft', verbose_name="Статус")
     views = models.PositiveIntegerField(default=0, verbose_name="Просмотры")
     viewed_users = models.ManyToManyField(User, blank=True, related_name='viewed_posts', verbose_name="Просмотрено пользователями")
+    liked_users = models.ManyToManyField(
+        User,
+        related_name="liked_posts",
+        blank=True,
+        verbose_name="Лайки"
+    )
+    disliked_users = models.ManyToManyField(
+        User,
+        related_name="disliked_posts",
+        blank=True,
+        verbose_name="Дизлайки"
+    )
 
     def save(self, *args, **kwargs):
         self.slug = slugify(unidecode(self.title))
@@ -56,10 +68,10 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-
+    
     def get_absolute_url(self):
         return reverse('blog:category_posts', kwargs={'category_slug': self.slug})
-
+    
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = "Категории"
@@ -77,7 +89,7 @@ class Tag(models.Model):
 
     def __str__(self):
         return f'#{self.name}'
-
+    
     def get_absolute_url(self):
         return reverse('blog:tag_posts', args=[self.slug])
 
