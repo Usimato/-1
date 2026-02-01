@@ -3,6 +3,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F, Q
+from django.contrib import messages
 from django.http import JsonResponse
 
 from blog.models import Post, Category, Tag
@@ -88,7 +89,7 @@ class PostDetailView(DetailView):
         post = super().get_object(queryset)
 
         user = self.request.user
-        session_key = f'post_{post.id}_viewed' # "post_32_viewed"
+        session_key = f'post_{post.id}_viewed'  # "post_32_viewed"
         if not self.request.session.get(session_key, False) and post.author != user:
             Post.objects.filter(id=post.id).update(views=F("views") + 1)
             post.views = post.views + 1
@@ -136,6 +137,7 @@ class CreatePostView(LoginRequiredMixin, CreateView):
             tag, _ = Tag.objects.get_or_create(name=tag_name)
             post.tags.add(tag)
 
+        messages.success(self.request, 'Пост успешно создан!')
         return redirect('blog:post_detail', post_slug=post.slug)
 
 
