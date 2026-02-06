@@ -2,49 +2,53 @@
 {% load static %}
 
 {% block page_title %}
-{{ block.super }} | Поиск постов
+    {{ block.super }} | Поиск постов
 {% endblock page_title %}
 
 {% block styles %}
-<link rel="stylesheet" href="{% static "blog/css/includes/post_container.css" %}">
+    <link rel="stylesheet" href="{% static "blog/css/includes/post_container.css" %}">
 {% endblock styles %}
 
+{% block scripts %}
+    <script src="{% static "blog/js/favorites.js" %}" type="module" defer></script>
+{% endblock scripts %}
+
 {% block page_content %}
-<h1>Поиск постов</h1>
+    <h1>Поиск постов</h1>
 
-{# method="GET" Указывать необязательно #}
-<form>
-    <input autocomplete="off" spellcheck="false" type="text" name="search" placeholder="Введите запрос" value="{{ request.GET.search }}">
-    
-    <label>
-        <input type="checkbox" name="search_category" {% if request.GET.search_category %}checked{% endif %}>
-        Искать в категориях
-    </label>
-    
-    <label>
-        <input type="checkbox" name="search_tag" {% if request.GET.search_tag %}checked{% endif %}>
-        Искать в тегах
-    </label>
-    
-    <button type="submit">Найти</button>
-    <button type="reset">Очистить</button>
-</form>
+    {# method="GET" Указывать необязательно #}
+    <form>
+        <input autocomplete="off" spellcheck="false" type="text" name="search" placeholder="Введите запрос" value="{{ request.GET.search }}">
 
-{% if search_performed %}
-    {% if posts %}
-    <h2>Найден(-о) {{ paginator.count }} пост(-а, -ов):</h2>
-    
-    <div class="container">
-        {% for post in posts %}
-        {% include 'blog/includes/post_container.html' %}
-        {% endfor %}
-    </div>
-    
-    {% include "blog/includes/pagination.html" %}
+        <label>
+            <input type="checkbox" name="search_category" {% if request.GET.search_category %}checked{% endif %}>
+            Искать в категориях
+        </label>
+
+        <label>
+            <input type="checkbox" name="search_tag" {% if request.GET.search_tag %}checked{% endif %}>
+            Искать в тегах
+        </label>
+
+        <button type="submit">Найти</button>
+        <button type="reset">Очистить</button>
+    </form>
+
+    {% if search_performed %}
+        {% if posts %}
+            <h2>Найден(-о) {{ paginator.count }} пост(-а, -ов):</h2>
+
+            <div class="container">
+                {% for post in posts %}
+                    {% include 'blog/includes/post_container.html' %}
+                {% endfor %}
+            </div>
+
+            {% include "blog/includes/pagination.html" %}
+        {% else %}
+            <p>По вашему запросу ничего не найдено.</p>
+        {% endif %}
     {% else %}
-    <p>По вашему запросу ничего не найдено.</p>
+        <p>Введите запрос для поиска постов</p>
     {% endif %}
-{% else %}
-    <p>Введите запрос для поиска постов</p>
-{% endif %}
 {% endblock page_content %}

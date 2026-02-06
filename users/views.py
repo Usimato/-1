@@ -1,12 +1,13 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView
+from django.views.generic import CreateView, DetailView, ListView
 from django.contrib.auth.views import LoginView, LogoutView
 from django.views.generic.list import MultipleObjectMixin
 from django.contrib import messages
 
 from django.conf import settings
+from blog.models import Post
 from users.forms import CustomAuthenticationForm
 
 User = get_user_model()
@@ -27,7 +28,7 @@ class CustomLoginView(LoginView):
         if next_url == settings.DEFAULT_LOGIN_REDIRECT_URL:
             return reverse_lazy(next_url, kwargs={'username': self.request.user.username})
         return next_url
-
+    
     def form_invalid(self, form):
         messages.warning(self.request, 'Ошибка входа!')
 
@@ -56,5 +57,14 @@ class ProfileView(DetailView, MultipleObjectMixin):
         del context['object_list']
 
         return context
+
+
+class FavoritePostsView(ListView):
+    template_name = 'users/pages/favorite_posts.html'
+    context_object_name = "posts"
+    paginate_by = 2
+
+    def get_queryset(self):
+        return self.request.user.bookmarked_posts.all()
 
 
