@@ -4,84 +4,90 @@
 
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block page_title %}Блог{% endblock page_title %}</title>
-    <link rel="icon" href="{% static 'images/favicon.ico' %}">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block page_title %}Блог{% endblock page_title %}</title>
+        <link rel="icon" href="{% static 'images/favicon.ico' %}">
 
-    {% bootstrap_css %}
-    {% bootstrap_javascript %}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+        {% bootstrap_css %}
+        {% bootstrap_javascript %}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
-    <link rel="stylesheet" href="{% static 'css/core.css' %}">
-    {% block styles %}{% endblock styles %}
-    <script src="{% static 'js/core.js' %}" type="module" defer></script>
-    {% block scripts %}{% endblock scripts %}
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm bg-dark" data-bs-theme="dark">
+        <link rel="stylesheet" href="{% static 'css/core.css' %}">
+        {% block styles %}{% endblock styles %}
+        <script src="{% static 'js/core.js' %}" type="module" defer></script>
+        {% block scripts %}{% endblock scripts %}
+    </head>
+    <body class="d-flex flex-column min-vh-100">
+        <header>
+            <nav class="navbar navbar-expand-sm rounded-bottom bg-dark" data-bs-theme="dark">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="{% url 'blog:main_page' %}">Pikabu</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'post_list' %}active{% endif %}" aria-current="page" href="{% url 'blog:post_list' %}">Список постов</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'new_post' %}active{% endif %}" aria-current="page" href="{% url 'blog:new_post' %}">Создать пост</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'post_search' %}active{% endif %}" href="{% url 'blog:post_search' %}">Поиск постов</a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav">
+                            {% if request.user.is_authenticated %}
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.resolver_match.url_name == 'profile' and request.resolver_match.kwargs.username == request.user.username %}active{% endif %}" href="{% url "users:profile" request.user.username %}">
+                                        {% bs_icon 'person-circle' extra_classes='me-1' %}{{ request.user }}
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <form class='nav-link' method="POST" action="{% url 'users:logout' %}">
+                                        {% csrf_token %}
+                                        <button type="submit">Выйти из аккаута</button>
+                                    </form>
+                                </li>
+                            {% else %}
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}" aria-current="page" href="{% url 'users:login' %}">Войти</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}" aria-current="page" href="{% url 'users:register' %}">Регистрация</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <main class="flex-grow-1">{% block page_content %}{% endblock page_content %}</main>
+        <footer class="bg-dark text-white rounded-top py-3">
             <div class="container-fluid">
-                <a class="navbar-brand" href="{% url 'blog:main_page' %}">Pikabu</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.resolver_match.url_name == 'post_list' %}active{% endif %}" aria-current="page" href="{% url 'blog:post_list' %}">Список постов</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.resolver_match.url_name == 'new_post' %}active{% endif %}" aria-current="page" href="{% url 'blog:new_post' %}">Создать пост</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.resolver_match.url_name == 'post_search' %}active{% endif %}" href="{% url 'blog:post_search' %}">Поиск постов</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        {% if request.user.is_authenticated %}
-                            <li class="nav-item">
-                                <a class="nav-link {% if request.resolver_match.url_name == 'profile' and request.resolver_match.kwargs.username == request.user.username %}active{% endif %}" href="{% url "users:profile" request.user.username %}">
-                                    {% bs_icon 'person-circle' extra_classes='me-1' %}{{ request.user }}
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <form class='nav-link' method="POST" action="{% url 'users:logout' %}">
-                                    {% csrf_token %}
-                                    <button type="submit">Выйти из аккаута</button>
-                                </form>
-                            </li>
-                        {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}" aria-current="page" href="{% url 'users:login' %}">Войти</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}" aria-current="page" href="{% url 'users:register' %}">Регистрация</a>
-                            </li>
-                        {% endif %}
-                    </ul>
+                <div class="text-center">
+                    &copy; Все права защищены 2025
                 </div>
             </div>
-        </nav>
-    </header>
-    <main>{% block page_content %}{% endblock page_content %}</main>
-    <footer>&copy; Все права защищены 2025</footer>
+        </footer>
 
-    <button id="scrollToTopBtn" class="scroll-to-top disabled">
-        {% bs_icon 'arrow-up' size="25px" %}
-    </button>
+        <button id="scrollToTopBtn" class="scroll-to-top disabled">
+            {% bs_icon 'arrow-up' size="25px" %}
+        </button>
 
-    {% if messages %}
-        <div class="position-fixed bottom-0 end-0 p-3">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show m-0 auto-dismiss" role="alert">
-                    {{ message }}
-                    <button class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-</body>
+        {% if messages %}
+            <div class="position-fixed bottom-0 end-0 p-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show m-0 auto-dismiss" role="alert">
+                        {{ message }}
+                        <button class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </body>
 </html>
