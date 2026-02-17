@@ -1,0 +1,35 @@
+{% extends "users/layouts/profile_base.html" %}
+{% load static %}
+
+{% block page_title %}{{ block.super }} | Блог{% endblock page_title %}
+
+{% block styles %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static "blog/css/includes/post_container.css" %}">
+{% endblock styles %}
+
+{% block scripts %}
+    <script src="{% static "blog/js/favorites.js" %}" type="module" defer></script>
+{% endblock scripts %}
+
+{% block profile_page_content %}
+    {% if user == request.user %}
+        <h1>Мой блог</h1>
+    {% else %}
+        <h1>Блог пользователя {{ user }}</h1>
+    {% endif %}
+
+    {% if posts %}
+        <div class="container">
+            {% for post in posts %}
+                {% if user == request.user or post.status != 'draft' %}
+                    {% include 'blog/includes/post_container.html' %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Постов ещё нет. Загляните позже!</p>
+    {% endif %}
+
+    {% include "blog/includes/pagination.html" %}
+{% endblock profile_page_content %}
